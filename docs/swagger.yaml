@@ -1,0 +1,76 @@
+definitions:
+  nasa.Metadata:
+    properties:
+      date:
+        type: string
+      explanation:
+        type: string
+      media_type:
+        type: string
+      service_version:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Betera test task in Gin Framework
+  title: Swagger Documentation
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Checking health of backend
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Health Check
+  /nasa:
+    get:
+      description: Endpoint for getting the whole album
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/nasa.Metadata'
+            type: array
+      summary: The whole album
+  /nasa/{date}:
+    get:
+      description: Endpoint for getting the APOD with exact date
+      parameters:
+      - description: Date
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/nasa.Metadata'
+      summary: The exact APOD
+  /nasa/health:
+    get:
+      description: Checking health of nasa endpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Nasa Endpoint Health Check
+swagger: "2.0"
