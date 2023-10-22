@@ -21,9 +21,9 @@ const (
 )
 
 type storage interface {
-	saveUser(ctx context.Context, dto *UserResponseDto) error
-	getAllAPODs(ctx context.Context) ([]*UserResponseDto, error)
-	getAPOD(ctx context.Context, date string) (*UserResponseDto, error)
+	saveUser(ctx context.Context, dto *UserResponseDto) (string, error)
+	getAllUsers(ctx context.Context) ([]*UserResponseDto, error)
+	getUser(ctx context.Context, id string) (*UserResponseDto, error)
 }
 
 type handler struct {
@@ -44,10 +44,9 @@ func (h *handler) RegisterRoutes(engine *gin.Engine) {
 	group := engine.Group("/users")
 
 	group.POST("/", h.CreateUser)
-
-	//group.GET("/", h.getAllAPODs)
-	//group.GET("/:date", h.getAPOD)
-	//group.GET("/health", h.index)
+	group.GET("/", h.getAllUsers)
+	group.GET("/:id", h.getUser)
+	group.GET("/health", h.index)
 }
 
 // @Summary Create user
@@ -140,7 +139,7 @@ func (h *handler) CreateUser(ctx *gin.Context) {
 		Nationality: nationalityDto.Country[0].CountryID,
 	}
 
-	err = h.repository.saveUser(ctx, response)
+	id, err := h.repository.saveUser(ctx, response)
 	if err != nil {
 		logger.Error(h.log, "error during saving user to database", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -149,17 +148,19 @@ func (h *handler) CreateUser(ctx *gin.Context) {
 		return
 	}
 
+	response.ID = id
+
 	h.log.Info("user created", slog.Any("user", response))
 	ctx.JSON(http.StatusCreated, response)
 }
 
-// @Summary The whole album
-// @Description Endpoint for getting the whole album
+// @Summary All users
+// @Description Endpoint for getting all users
 // @Produce application/json
-// @Success 200 {object} []User{}
-// @Router /nasa [get]
-func (h *handler) getAllAPODs(ctx *gin.Context) {
-	apods, err := h.repository.getAllAPODs(ctx)
+// @Success 200 {object} []UserResponseDto{}
+// @Router /users [get]
+func (h *handler) getAllUsers(ctx *gin.Context) {
+	users, err := h.repository.getAllUsers(ctx)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
 			ctx.JSON(http.StatusNotFound, gin.H{
@@ -173,7 +174,7 @@ func (h *handler) getAllAPODs(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, apods)
+	ctx.JSON(http.StatusOK, users)
 }
 
 //func (h *handler) parseMetadata() {
@@ -238,26 +239,26 @@ func (h *handler) getAllAPODs(ctx *gin.Context) {
 //	}
 //}
 
-// @Summary Nasa Endpoint Health Check
-// @Description Checking health of nasa endpoint
+// @Summary Users Endpoint Health Check
+// @Description Checking health of users endpoint
 // @Produce application/json
 // @Success 200 {string} nasa
-// @Router /nasa/health [get]
+// @Router /users/health [get]
 func (h *handler) index(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "nasa")
 }
 
-// @Summary The exact APOD
-// @Description Endpoint for getting the APOD with exact date
+// @Summary The exact User
+// @Description Endpoint for getting user with exact id
 // @Produce application/json
-// @Success 200 {object} User
+// @Success 200 {object} UserResponseDto
 // @Param date path string true "Date"
-// @Router /nasa/{date} [get]
-func (h *handler) getAPOD(ctx *gin.Context) {
-	date := ctx.Param("date")
-	h.log.Info("got date param", slog.String("date", date))
+// @Router /users/{id} [get]
+func (h *handler) getUser(ctx *gin.Context) {
+	id := ctx.Param("id")
+	h.log.Debug("got id param", slog.String("id", id))
 
-	apod, err := h.repository.getAPOD(ctx, date)
+	user, err := h.repository.getUser(ctx, id)
 	if err != nil {
 		logger.Error(h.log, "error during db query", err)
 		if errors.Is(err, ErrNotFound) {
@@ -272,7 +273,7 @@ func (h *handler) getAPOD(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, apod)
+	ctx.JSON(http.StatusOK, user)
 }
 
 //func (h *handler) saveToMinio(ctx context.Context, client *minio.Client, fileName, filePath string) error {

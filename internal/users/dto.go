@@ -7,6 +7,7 @@ type UserRequestDto struct {
 }
 
 type UserResponseDto struct {
+	ID          string `json:"id"`
 	LastName    string `json:"lastName"`
 	FirstName   string `json:"firstName"`
 	SecondName  string `json:"secondName,omitempty"`
