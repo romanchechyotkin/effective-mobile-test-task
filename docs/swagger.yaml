@@ -1,9 +1,17 @@
 definitions:
-  users.User:
+  users.UserResponseDto:
     properties:
+      age:
+        type: integer
       firstName:
         type: string
+      gender:
+        type: string
+      id:
+        type: string
       lastName:
+        type: string
+      nationality:
         type: string
       secondName:
         type: string
@@ -26,9 +34,9 @@ paths:
           schema:
             type: string
       summary: Health Check
-  /nasa:
+  /users:
     get:
-      description: Endpoint for getting the whole album
+      description: Endpoint for getting all users
       produces:
       - application/json
       responses:
@@ -36,16 +44,26 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/users.User'
+              $ref: '#/definitions/users.UserResponseDto'
             type: array
-      summary: The whole album
-  /nasa/{date}:
+      summary: All users
+    post:
+      description: Endpoint for creating and saving user to database
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/users.UserResponseDto'
+      summary: Create user
+  /users/{id}:
     get:
-      description: Endpoint for getting the APOD with exact date
+      description: Endpoint for getting user with exact id
       parameters:
-      - description: Date
+      - description: id
         in: path
-        name: date
+        name: id
         required: true
         type: string
       produces:
@@ -54,11 +72,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/users.User'
-      summary: The exact APOD
-  /nasa/health:
+            $ref: '#/definitions/users.UserResponseDto'
+      summary: The exact user
+  /users/health:
     get:
-      description: Checking health of nasa endpoint
+      description: Checking health of users endpoint
       produces:
       - application/json
       responses:
@@ -66,16 +84,5 @@ paths:
           description: OK
           schema:
             type: string
-      summary: Nasa Endpoint Health Check
-  /users:
-    post:
-      description: Endpoint for creating and saving user to database
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema:
-            $ref: '#/definitions/users.User'
-      summary: Create user
+      summary: Users Endpoint Health Check
 swagger: "2.0"

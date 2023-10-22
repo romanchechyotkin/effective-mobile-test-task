@@ -3,9 +3,10 @@ package users
 import (
 	"context"
 	"errors"
+	"log/slog"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"log/slog"
 
 	"github.com/romanchechyotkin/effective-mobile-test-task/pkg/logger"
 	"github.com/romanchechyotkin/effective-mobile-test-task/pkg/postgresql"

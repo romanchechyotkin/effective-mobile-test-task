@@ -32,33 +32,48 @@ const docTemplate = `{
                 }
             }
         },
-        "/nasa": {
+        "/users": {
             "get": {
-                "description": "Endpoint for getting the whole album",
+                "description": "Endpoint for getting all users",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "The whole album",
+                "summary": "All users",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/users.User"
+                                "$ref": "#/definitions/users.UserResponseDto"
                             }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Endpoint for creating and saving user to database",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create user",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/users.UserResponseDto"
                         }
                     }
                 }
             }
         },
-        "/nasa/health": {
+        "/users/health": {
             "get": {
-                "description": "Checking health of nasa endpoint",
+                "description": "Checking health of users endpoint",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Nasa Endpoint Health Check",
+                "summary": "Users Endpoint Health Check",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -69,18 +84,18 @@ const docTemplate = `{
                 }
             }
         },
-        "/nasa/{date}": {
+        "/users/{id}": {
             "get": {
-                "description": "Endpoint for getting the APOD with exact date",
+                "description": "Endpoint for getting user with exact id",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "The exact APOD",
+                "summary": "The exact user",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Date",
-                        "name": "date",
+                        "description": "id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -89,24 +104,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/users.User"
-                        }
-                    }
-                }
-            }
-        },
-        "/users": {
-            "post": {
-                "description": "Endpoint for creating and saving user to database",
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Create user",
-                "responses": {
-                    "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "$ref": "#/definitions/users.User"
+                            "$ref": "#/definitions/users.UserResponseDto"
                         }
                     }
                 }
@@ -114,13 +112,25 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "users.User": {
+        "users.UserResponseDto": {
             "type": "object",
             "properties": {
+                "age": {
+                    "type": "integer"
+                },
                 "firstName": {
                     "type": "string"
                 },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
                 "lastName": {
+                    "type": "string"
+                },
+                "nationality": {
                     "type": "string"
                 },
                 "secondName": {
