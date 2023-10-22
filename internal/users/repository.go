@@ -3,9 +3,13 @@ package users
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/romanchechyotkin/effective-mobile-test-task/pkg/logger"
+	"github.com/romanchechyotkin/effective-mobile-test-task/pkg/postgresql"
 )
 
 var ErrNotFound = errors.New("not found")
@@ -22,24 +26,24 @@ func newRepository(logger *slog.Logger, pool *pgxpool.Pool) storage {
 	}
 }
 
-func (r *repository) saveAPOD(ctx context.Context, dto *User) error {
-	//query := `
-	//	INSERT INTO apods (title, explanation, image, media_type, service_version, date)
-	//	VALUES ($1, $2, $3, $4, $5, $6)
-	//`
-	//
-	//r.log.Info("database query", slog.String("query", postgresql.FormatQuery(query)))
-	//exec, err := r.pool.Exec(ctx, query, dto.Title, dto.Explanation, dto.URL, dto.MediaType, dto.ServiceVersion, dto.Date)
-	//if err != nil {
-	//	logger.Error(r.log, "error during execution", err)
-	//	return err
-	//}
-	//r.log.Info("result of execution", slog.String("result", fmt.Sprintf("rows affected %d", exec.RowsAffected())))
+func (r *repository) saveUser(ctx context.Context, dto *UserResponseDto) error {
+	query := `
+		INSERT INTO users (last_name, first_name, second_name, age, gender, nationality)
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`
+
+	r.log.Info("database query", slog.String("query", postgresql.FormatQuery(query)))
+	exec, err := r.pool.Exec(ctx, query, dto.LastName, dto.FirstName, dto.SecondName, dto.Age, dto.Gender, dto.Nationality)
+	if err != nil {
+		logger.Error(r.log, "error during execution", err)
+		return err
+	}
+	r.log.Info("result of execution", slog.String("result", fmt.Sprintf("rows affected %d", exec.RowsAffected())))
 
 	return nil
 }
 
-func (r *repository) getAllAPODs(ctx context.Context) ([]*User, error) {
+func (r *repository) getAllAPODs(ctx context.Context) ([]*UserResponseDto, error) {
 	//query := `
 	//	SELECT title, explanation, image, media_type, service_version, date FROM apods
 	//`
@@ -71,7 +75,7 @@ func (r *repository) getAllAPODs(ctx context.Context) ([]*User, error) {
 	return nil, nil
 }
 
-func (r *repository) getAPOD(ctx context.Context, date string) (*User, error) {
+func (r *repository) getAPOD(ctx context.Context, date string) (*UserResponseDto, error) {
 	//query := `
 	//	SELECT title, explanation, image, media_type, service_version, date
 	//	FROM apods

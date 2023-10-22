@@ -2,20 +2,28 @@ package users
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
-	"github.com/romanchechyotkin/betera-test-task/internal/httpserver"
+	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/romanchechyotkin/betera-test-task/pkg/logger"
+	"github.com/romanchechyotkin/effective-mobile-test-task/internal/httpserver"
+	"github.com/romanchechyotkin/effective-mobile-test-task/pkg/logger"
+)
+
+const (
+	AgeApi         = "https://api.agify.io/?name="
+	GenderApi      = "https://api.genderize.io/?name="
+	NationalityApi = "https://api.nationalize.io/?name="
 )
 
 type storage interface {
-	saveAPOD(ctx context.Context, dto *User) error
-	getAllAPODs(ctx context.Context) ([]*User, error)
-	getAPOD(ctx context.Context, date string) (*User, error)
+	saveUser(ctx context.Context, dto *UserResponseDto) error
+	getAllAPODs(ctx context.Context) ([]*UserResponseDto, error)
+	getAPOD(ctx context.Context, date string) (*UserResponseDto, error)
 }
 
 type handler struct {
@@ -33,17 +41,122 @@ func newHandler(logger *slog.Logger, repo storage) httpserver.Handler {
 }
 
 func (h *handler) RegisterRoutes(engine *gin.Engine) {
-	group := engine.Group("/nasa")
+	group := engine.Group("/users")
 
-	group.GET("/", h.getAllAPODs)
-	group.GET("/:date", h.getAPOD)
-	group.GET("/health", h.index)
+	group.POST("/", h.CreateUser)
+
+	//group.GET("/", h.getAllAPODs)
+	//group.GET("/:date", h.getAPOD)
+	//group.GET("/health", h.index)
+}
+
+// @Summary Create user
+// @Description Endpoint for creating and saving user to database
+// @Produce application/json
+// @Success 201 {object} User
+// @Router /users [post]
+func (h *handler) CreateUser(ctx *gin.Context) {
+	var userDto UserRequestDto
+
+	err := ctx.ShouldBindJSON(&userDto)
+	if err != nil {
+		logger.Error(h.log, "error during decoding user", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	h.log.Debug("decoded user dto", slog.Any("dto", userDto))
+
+	resp, err := http.Get(fmt.Sprintf("%s%s", AgeApi, userDto.FirstName))
+	if err != nil {
+		logger.Error(h.log, "error during request to age api", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	var ageDto AgeRequestDto
+	err = json.NewDecoder(resp.Body).Decode(&ageDto)
+	if err != nil {
+		logger.Error(h.log, "error during decoding age info", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	h.log.Debug("decoded age dto", slog.Any("dto", ageDto))
+
+	resp, err = http.Get(fmt.Sprintf("%s%s", GenderApi, userDto.FirstName))
+	if err != nil {
+		logger.Error(h.log, "error during request to gender api", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	var genderDto GenderRequestDto
+	err = json.NewDecoder(resp.Body).Decode(&genderDto)
+	if err != nil {
+		logger.Error(h.log, "error during decoding gender info", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	h.log.Debug("decoded gender dto", slog.Any("dto", genderDto))
+
+	resp, err = http.Get(fmt.Sprintf("%s%s", NationalityApi, userDto.FirstName))
+	if err != nil {
+		logger.Error(h.log, "error during request to nationality api", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	var nationalityDto NationalityRequestDto
+	err = json.NewDecoder(resp.Body).Decode(&nationalityDto)
+	if err != nil {
+		logger.Error(h.log, "error during decoding nationality info", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	h.log.Debug("decoded nationality dto", slog.Any("dto", nationalityDto))
+
+	response := &UserResponseDto{
+		LastName:    userDto.LastName,
+		FirstName:   userDto.FirstName,
+		SecondName:  userDto.SecondName,
+		Age:         ageDto.Age,
+		Gender:      genderDto.Gender,
+		Nationality: nationalityDto.Country[0].CountryID,
+	}
+
+	err = h.repository.saveUser(ctx, response)
+	if err != nil {
+		logger.Error(h.log, "error during saving user to database", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	h.log.Info("user created", slog.Any("user", response))
+	ctx.JSON(http.StatusCreated, response)
 }
 
 // @Summary The whole album
 // @Description Endpoint for getting the whole album
 // @Produce application/json
-// @Success 200 {object} []Metadata{}
+// @Success 200 {object} []User{}
 // @Router /nasa [get]
 func (h *handler) getAllAPODs(ctx *gin.Context) {
 	apods, err := h.repository.getAllAPODs(ctx)
@@ -137,7 +250,7 @@ func (h *handler) index(ctx *gin.Context) {
 // @Summary The exact APOD
 // @Description Endpoint for getting the APOD with exact date
 // @Produce application/json
-// @Success 200 {object} Metadata
+// @Success 200 {object} User
 // @Param date path string true "Date"
 // @Router /nasa/{date} [get]
 func (h *handler) getAPOD(ctx *gin.Context) {

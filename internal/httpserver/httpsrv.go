@@ -9,8 +9,8 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	swagger "github.com/swaggo/gin-swagger"
 
-	_ "github.com/romanchechyotkin/betera-test-task/docs"
-	"github.com/romanchechyotkin/betera-test-task/pkg/logger"
+	_ "github.com/romanchechyotkin/effective-mobile-test-task/docs"
+	"github.com/romanchechyotkin/effective-mobile-test-task/pkg/logger"
 )
 
 type Handler interface {

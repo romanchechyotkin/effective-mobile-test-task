@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Betera test task in Gin Framework",
+        "description": "Effective Mobile test task in Gin Framework",
         "title": "Swagger Documentation",
         "contact": {},
         "version": "1.0"
@@ -38,7 +38,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/nasa.Metadata"
+                                "$ref": "#/definitions/users.User"
                             }
                         }
                     }
@@ -82,7 +82,24 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/nasa.Metadata"
+                            "$ref": "#/definitions/users.User"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "post": {
+                "description": "Endpoint for creating and saving user to database",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create user",
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/users.User"
                         }
                     }
                 }
@@ -90,25 +107,16 @@
         }
     },
     "definitions": {
-        "nasa.Metadata": {
+        "users.User": {
             "type": "object",
             "properties": {
-                "date": {
+                "firstName": {
                     "type": "string"
                 },
-                "explanation": {
+                "lastName": {
                     "type": "string"
                 },
-                "media_type": {
-                    "type": "string"
-                },
-                "service_version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "url": {
+                "secondName": {
                     "type": "string"
                 }
             }

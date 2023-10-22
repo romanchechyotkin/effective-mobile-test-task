@@ -1,4 +1,4 @@
-module github.com/romanchechyotkin/betera-test-task
+module github.com/romanchechyotkin/effective-mobile-test-task
 
 go 1.21.0
 

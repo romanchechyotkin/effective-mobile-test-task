@@ -45,7 +45,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/nasa.Metadata"
+                                "$ref": "#/definitions/users.User"
                             }
                         }
                     }
@@ -89,7 +89,24 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/nasa.Metadata"
+                            "$ref": "#/definitions/users.User"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "post": {
+                "description": "Endpoint for creating and saving user to database",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create user",
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/users.User"
                         }
                     }
                 }
@@ -97,25 +114,16 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "nasa.Metadata": {
+        "users.User": {
             "type": "object",
             "properties": {
-                "date": {
+                "firstName": {
                     "type": "string"
                 },
-                "explanation": {
+                "lastName": {
                     "type": "string"
                 },
-                "media_type": {
-                    "type": "string"
-                },
-                "service_version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "url": {
+                "secondName": {
                     "type": "string"
                 }
             }
@@ -130,7 +138,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Swagger Documentation",
-	Description:      "Betera test task in Gin Framework",
+	Description:      "Effective Mobile test task in Gin Framework",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

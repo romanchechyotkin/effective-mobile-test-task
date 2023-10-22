@@ -1,10 +1,11 @@
 package users
 
 import (
-	"github.com/romanchechyotkin/betera-test-task/internal/httpserver"
 	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/romanchechyotkin/effective-mobile-test-task/internal/httpserver"
 )
 
 func RegisterDomain(logger *slog.Logger, pool *pgxpool.Pool) httpserver.Handler {

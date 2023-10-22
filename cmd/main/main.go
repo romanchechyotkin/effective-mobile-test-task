@@ -4,10 +4,10 @@ import (
 	"context"
 	"os"
 
-	"github.com/romanchechyotkin/betera-test-task/internal/httpserver"
-	"github.com/romanchechyotkin/betera-test-task/internal/users"
-	"github.com/romanchechyotkin/betera-test-task/pkg/logger"
-	"github.com/romanchechyotkin/betera-test-task/pkg/postgresql"
+	"github.com/romanchechyotkin/effective-mobile-test-task/internal/httpserver"
+	"github.com/romanchechyotkin/effective-mobile-test-task/internal/users"
+	"github.com/romanchechyotkin/effective-mobile-test-task/pkg/logger"
+	"github.com/romanchechyotkin/effective-mobile-test-task/pkg/postgresql"
 )
 
 // @title Swagger Documentation

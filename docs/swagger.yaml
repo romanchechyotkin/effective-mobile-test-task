@@ -1,23 +1,17 @@
 definitions:
-  nasa.Metadata:
+  users.User:
     properties:
-      date:
+      firstName:
         type: string
-      explanation:
+      lastName:
         type: string
-      media_type:
-        type: string
-      service_version:
-        type: string
-      title:
-        type: string
-      url:
+      secondName:
         type: string
     type: object
 host: localhost:8080
 info:
   contact: {}
-  description: Betera test task in Gin Framework
+  description: Effective Mobile test task in Gin Framework
   title: Swagger Documentation
   version: "1.0"
 paths:
@@ -42,7 +36,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/nasa.Metadata'
+              $ref: '#/definitions/users.User'
             type: array
       summary: The whole album
   /nasa/{date}:
@@ -60,7 +54,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/nasa.Metadata'
+            $ref: '#/definitions/users.User'
       summary: The exact APOD
   /nasa/health:
     get:
@@ -73,4 +67,15 @@ paths:
           schema:
             type: string
       summary: Nasa Endpoint Health Check
+  /users:
+    post:
+      description: Endpoint for creating and saving user to database
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/users.User'
+      summary: Create user
 swagger: "2.0"

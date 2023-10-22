@@ -9,7 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/romanchechyotkin/betera-test-task/pkg/logger"
+	"github.com/romanchechyotkin/effective-mobile-test-task/pkg/logger"
 )
 
 type pgConfig struct {
