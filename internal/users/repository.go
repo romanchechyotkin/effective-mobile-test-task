@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 
 	"github.com/jackc/pgx/v5"
@@ -93,4 +94,47 @@ func (r *repository) getUser(ctx context.Context, id string) (*UserResponseDto, 
 	}
 
 	return &dto, nil
+}
+
+func (r *repository) updateUser(ctx context.Context, id, col string, val any) error {
+	query := fmt.Sprintf(`
+		UPDATE users
+		SET %s = $1
+		WHERE id = $2
+`, col)
+
+	r.log.Info("database query", slog.String("query", postgresql.FormatQuery(query)))
+	exec, err := r.pool.Exec(ctx, query, val, id)
+	if err != nil {
+		logger.Error(r.log, "error during execution", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		} else {
+			return err
+		}
+	}
+	r.log.Info("result of execution", slog.Int("rows affected", int(exec.RowsAffected())))
+
+	return nil
+}
+
+func (r *repository) deleteUser(ctx context.Context, id string) error {
+	query := `
+		DELETE FROM effective.public.users
+		WHERE id = $1
+	`
+
+	r.log.Info("database query", slog.String("query", postgresql.FormatQuery(query)))
+	exec, err := r.pool.Exec(ctx, query, id)
+	if err != nil {
+		logger.Error(r.log, "error during scanning", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		} else {
+			return err
+		}
+	}
+	r.log.Info("result of execution", slog.Int("rows affected", int(exec.RowsAffected())))
+
+	return nil
 }

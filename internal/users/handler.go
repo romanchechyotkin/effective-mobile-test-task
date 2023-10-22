@@ -25,6 +25,8 @@ type storage interface {
 	saveUser(ctx context.Context, dto *UserResponseDto) (string, error)
 	getAllUsers(ctx context.Context) ([]*UserResponseDto, error)
 	getUser(ctx context.Context, id string) (*UserResponseDto, error)
+	updateUser(ctx context.Context, id, col string, val any) error
+	deleteUser(ctx context.Context, id string) error
 }
 
 type handler struct {
@@ -44,9 +46,11 @@ func newHandler(logger *slog.Logger, repo storage) httpserver.Handler {
 func (h *handler) RegisterRoutes(engine *gin.Engine) {
 	group := engine.Group("/users")
 
-	group.POST("/", h.CreateUser)
+	group.POST("/", h.createUser)
 	group.GET("/", h.getAllUsers)
 	group.GET("/:id", h.getUser)
+	group.PATCH("/:id", h.updateUser)
+	group.DELETE("/:id", h.deleteUser)
 	group.GET("/health", h.index)
 }
 
@@ -55,14 +59,14 @@ func (h *handler) RegisterRoutes(engine *gin.Engine) {
 // @Produce application/json
 // @Success 201 {object} UserResponseDto
 // @Router /users [post]
-func (h *handler) CreateUser(ctx *gin.Context) {
+func (h *handler) createUser(ctx *gin.Context) {
 	var userDto UserRequestDto
 	var wg sync.WaitGroup
 
 	err := ctx.ShouldBindJSON(&userDto)
 	if err != nil {
 		logger.Error(h.log, "error during decoding user", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
@@ -89,7 +93,7 @@ func (h *handler) CreateUser(ctx *gin.Context) {
 		err = json.NewDecoder(resp.Body).Decode(&ageDto)
 		if err != nil {
 			logger.Error(h.log, "error during decoding age info", err)
-			ctx.JSON(http.StatusInternalServerError, gin.H{
+			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
 			return
@@ -113,7 +117,7 @@ func (h *handler) CreateUser(ctx *gin.Context) {
 		err = json.NewDecoder(resp.Body).Decode(&genderDto)
 		if err != nil {
 			logger.Error(h.log, "error during decoding gender info", err)
-			ctx.JSON(http.StatusInternalServerError, gin.H{
+			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
 			return
@@ -137,7 +141,7 @@ func (h *handler) CreateUser(ctx *gin.Context) {
 		err = json.NewDecoder(resp.Body).Decode(&nationalityDto)
 		if err != nil {
 			logger.Error(h.log, "error during decoding nationality info", err)
-			ctx.JSON(http.StatusInternalServerError, gin.H{
+			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
 			return
@@ -203,7 +207,7 @@ func (h *handler) index(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "users")
 }
 
-// @Summary The exact user
+// @Summary Get exact user
 // @Description Endpoint for getting user with exact id
 // @Produce application/json
 // @Success 200 {object} UserResponseDto
@@ -229,4 +233,78 @@ func (h *handler) getUser(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, user)
+}
+
+// @Summary Update exact user
+// @Description Endpoint for updating user with exact id
+// @Produce application/json
+// @Success 204 {object} UserResponseDto
+// @Param id path string true "id"
+// @Router /users/{id} [patch]
+func (h *handler) updateUser(ctx *gin.Context) {
+	id := ctx.Param("id")
+	h.log.Debug("got id param", slog.String("id", id))
+
+	var dto map[string]any
+	err := ctx.ShouldBindJSON(&dto)
+	if err != nil {
+		logger.Error(h.log, "error during decoding", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	h.log.Debug("decoded update user dto", slog.Any("dto", dto))
+
+	for k, v := range dto {
+		err := h.repository.updateUser(ctx, id, k, v)
+		if err != nil {
+			logger.Error(h.log, "error during updating in database", err)
+			if errors.Is(err, ErrNotFound) {
+				ctx.JSON(http.StatusNotFound, gin.H{
+					"error": err.Error(),
+				})
+			} else {
+				ctx.JSON(http.StatusInternalServerError, gin.H{
+					"error": err.Error(),
+				})
+			}
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusNoContent, gin.H{
+		"message": "updated successfully",
+	})
+}
+
+// @Summary Delete exact user
+// @Description Endpoint for deleting user with exact id
+// @Produce application/json
+// @Success 204 {object} UserResponseDto
+// @Param id path string true "id"
+// @Router /users/{id} [delete]
+func (h *handler) deleteUser(ctx *gin.Context) {
+	id := ctx.Param("id")
+	h.log.Debug("got id param", slog.String("id", id))
+
+	err := h.repository.deleteUser(ctx, id)
+	if err != nil {
+		logger.Error(h.log, "error during db query", err)
+		if errors.Is(err, ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, gin.H{
+		"message": "deleted successfully",
+	})
 }

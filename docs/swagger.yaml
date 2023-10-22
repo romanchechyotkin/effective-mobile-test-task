@@ -58,6 +58,22 @@ paths:
             $ref: '#/definitions/users.UserResponseDto'
       summary: Create user
   /users/{id}:
+    delete:
+      description: Endpoint for deleting user with exact id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/users.UserResponseDto'
+      summary: Delete exact user
     get:
       description: Endpoint for getting user with exact id
       parameters:
@@ -73,7 +89,23 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/users.UserResponseDto'
-      summary: The exact user
+      summary: Get exact user
+    patch:
+      description: Endpoint for updating user with exact id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/users.UserResponseDto'
+      summary: Update exact user
   /users/health:
     get:
       description: Checking health of users endpoint

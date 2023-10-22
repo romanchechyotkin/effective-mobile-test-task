@@ -90,7 +90,7 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "The exact user",
+                "summary": "Get exact user",
                 "parameters": [
                     {
                         "type": "string",
@@ -103,6 +103,54 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/users.UserResponseDto"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Endpoint for deleting user with exact id",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Delete exact user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/users.UserResponseDto"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Endpoint for updating user with exact id",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update exact user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
                         "schema": {
                             "$ref": "#/definitions/users.UserResponseDto"
                         }
