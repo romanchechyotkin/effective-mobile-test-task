@@ -25,6 +25,13 @@
 ```
     http://localhost:8080/swagger/index.html
 ```
+
+```
+    http://localhost:8080/users?limit={value}&sort={value}
+```
+для сортировки есть age.a для получения пользователей в зависимости от возраста в порядке возрастания
+и age.d в порядке убывания
+
 чтобы сгенерировать swagger документацию 
 ```
     make gen_docs

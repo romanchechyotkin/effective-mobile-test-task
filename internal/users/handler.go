@@ -21,9 +21,14 @@ const (
 	NationalityApi = "https://api.nationalize.io/?name="
 )
 
+const (
+	SORT_BY_ASC_AGE  = "age.a"
+	SORT_BY_DESC_AGE = "age.d"
+)
+
 type storage interface {
 	saveUser(ctx context.Context, dto *UserResponseDto) (string, error)
-	getAllUsers(ctx context.Context) ([]*UserResponseDto, error)
+	getAllUsers(ctx context.Context, opt ...string) ([]*UserResponseDto, error)
 	getUser(ctx context.Context, id string) (*UserResponseDto, error)
 	updateUser(ctx context.Context, id, col string, val any) error
 	deleteUser(ctx context.Context, id string) error
@@ -181,7 +186,23 @@ func (h *handler) createUser(ctx *gin.Context) {
 // @Success 200 {object} []UserResponseDto{}
 // @Router /users [get]
 func (h *handler) getAllUsers(ctx *gin.Context) {
-	users, err := h.repository.getAllUsers(ctx)
+	sort := ctx.Query("sort")
+	limit := ctx.Query("limit")
+	h.log.Debug("got sort query value", slog.String("sort", sort))
+	h.log.Debug("got limit query value", slog.String("limit", limit))
+
+	var users []*UserResponseDto
+	var err error
+
+	switch sort {
+	case SORT_BY_ASC_AGE:
+		users, err = h.repository.getAllUsers(ctx, sort, limit)
+	case SORT_BY_DESC_AGE:
+		users, err = h.repository.getAllUsers(ctx, sort, limit)
+	default:
+		users, err = h.repository.getAllUsers(ctx, sort, limit)
+	}
+
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
 			ctx.JSON(http.StatusNotFound, gin.H{

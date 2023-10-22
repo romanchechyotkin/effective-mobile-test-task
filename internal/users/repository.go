@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"strconv"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -45,13 +46,45 @@ func (r *repository) saveUser(ctx context.Context, dto *UserResponseDto) (string
 	return id, nil
 }
 
-func (r *repository) getAllUsers(ctx context.Context) ([]*UserResponseDto, error) {
-	query := `
-		SELECT id, last_name, first_name, second_name, age, gender, nationality FROM effective.public.users
+func (r *repository) getAllUsers(ctx context.Context, opt ...string) ([]*UserResponseDto, error) {
+	var orderBy, query string
+	limit := 3 // default limit
+
+	if len(opt) != 0 {
+		orderBy = opt[0]
+	}
+
+	if opt[1] != "" {
+		i, _ := strconv.ParseInt(opt[1], 10, 64)
+		limit = int(i)
+	}
+
+	switch orderBy {
+	case SORT_BY_ASC_AGE:
+		query = `
+		SELECT id, last_name, first_name, second_name, age, gender, nationality 
+		FROM effective.public.users
+		ORDER BY age
+		LIMIT $1
 	`
+	case SORT_BY_DESC_AGE:
+		query = `
+		SELECT id, last_name, first_name, second_name, age, gender, nationality 
+		FROM effective.public.users
+		ORDER BY age DESC 
+		LIMIT $1
+	`
+	default:
+		query = `
+		SELECT id, last_name, first_name, second_name, age, gender, nationality 
+		FROM effective.public.users	
+		ORDER BY created_at 
+		LIMIT $1
+	`
+	}
 
 	r.log.Info("database query", slog.String("query", postgresql.FormatQuery(query)))
-	rows, err := r.pool.Query(ctx, query)
+	rows, err := r.pool.Query(ctx, query, limit)
 	if err != nil {
 		logger.Error(r.log, "error during query", err)
 		return nil, err

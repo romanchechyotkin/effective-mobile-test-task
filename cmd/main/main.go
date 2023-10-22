@@ -18,21 +18,21 @@ func main() {
 	log := logger.New(os.Stdout)
 	log.Debug("app running")
 
-	pgConfig := postgresql.NewPgConfig(
-		"chechyotka",
-		"5432",
-		"localhost",
-		"5432",
-		"effective",
-	)
-
 	//pgConfig := postgresql.NewPgConfig(
-	//	os.Getenv("POSTGRES_USER"),
-	//	os.Getenv("POSTGRES_PASSWORD"),
-	//	os.Getenv("POSTGRES_HOST"),
-	//	os.Getenv("POSTGRES_PORT"),
-	//	os.Getenv("POSTGRES_DB"),
+	//	"chechyotka",
+	//	"5432",
+	//	"localhost",
+	//	"5432",
+	//	"effective",
 	//)
+
+	pgConfig := postgresql.NewPgConfig(
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_HOST"),
+		os.Getenv("POSTGRES_PORT"),
+		os.Getenv("POSTGRES_DB"),
+	)
 
 	pgClient := postgresql.NewClient(context.Background(), log, pgConfig)
 	usersDomain := users.RegisterDomain(log, pgClient)

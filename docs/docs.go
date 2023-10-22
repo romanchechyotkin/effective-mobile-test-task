@@ -166,7 +166,7 @@ const docTemplate = `{
                 "age": {
                     "type": "integer"
                 },
-                "firstName": {
+                "first_name": {
                     "type": "string"
                 },
                 "gender": {
@@ -175,13 +175,13 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "lastName": {
+                "last_name": {
                     "type": "string"
                 },
                 "nationality": {
                     "type": "string"
                 },
-                "secondName": {
+                "second_name": {
                     "type": "string"
                 }
             }
